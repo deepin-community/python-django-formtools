@@ -3,11 +3,15 @@
 UPSTREAM_GIT := https://github.com/django/django-formtools.git
 include /usr/share/openstack-pkg-tools/pkgos.make
 
+export SETUPTOOLS_SCM_PRETEND_VERSION=$(shell dpkg-parsechangelog -SVersion | sed -e 's/^[[:digit:]]*://' -e 's/[-].*//' -e 's/~git.*//' -e 's/~/.0/' -e 's/+dfsg1//' -e 's/+ds1//' | head -n 1)
+
 %:
 	dh $@ --buildsystem=python_distutils --with python3,sphinxdoc
 
 override_dh_auto_clean:
-	rm -rf build
+	rm -rf build *.egg-info .coverage
+	find . -iname '*.pyc' -delete
+	for i in $$(find . -type d -iname __pycache__) ; do rm -rf $$i ; done
 
 override_dh_auto_build:
 	echo "Do nothing..."
@@ -27,7 +31,7 @@ ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 		else \
 			LIBDIR_END=$$PYMAJOR ; \
 		fi ; \
-		PYTHONPATH=. DJANGO_SETTINGS_MODULE=tests.settings PYTHON=python$${pyvers} python$${PYMAJOR}-coverage run /usr/lib/python$$LIBDIR_END/dist-packages/django/bin/django-admin.py test tests ; \
+		PYTHONPATH=. DJANGO_SETTINGS_MODULE=tests.settings PYTHON=python$${pyvers} python$${PYMAJOR}-coverage run /usr/bin/django-admin test tests ; \
 	done
 endif
 
