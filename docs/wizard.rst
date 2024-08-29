@@ -219,17 +219,17 @@ Here's a full example template:
     {% if wizard.form.forms %}
         {{ wizard.form.management_form }}
         {% for form in wizard.form.forms %}
-            {{ form }}
+            {{ form.as_table }}
         {% endfor %}
     {% else %}
         {{ wizard.form }}
     {% endif %}
     </table>
     {% if wizard.steps.prev %}
-    <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">{% trans "first step" %}</button>
-    <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">{% trans "prev step" %}</button>
+    <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">{% translate "first step" %}</button>
+    <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">{% translate "prev step" %}</button>
     {% endif %}
-    <input type="submit" value="{% trans "submit" %}"/>
+    <input type="submit" value="{% translate "submit" %}"/>
     </form>
     {% endblock %}
 
@@ -250,13 +250,13 @@ deploy the new :class:`WizardView` object at a URL in the ``urls.py``. The
 wizard's ``as_view()`` method takes a list of your
 :class:`~django.forms.Form` classes as an argument during instantiation::
 
-    from django.conf.urls import url
+    from django.path import path
 
     from myapp.forms import ContactForm1, ContactForm2
     from myapp.views import ContactWizard
 
     urlpatterns = [
-        url(r'^contact/$', ContactWizard.as_view([ContactForm1, ContactForm2])),
+        path('contact/', ContactWizard.as_view([ContactForm1, ContactForm2])),
     ]
 
 You can also pass the form list as a class attribute named ``form_list``::
@@ -311,7 +311,7 @@ Here's what the view code might look like::
 The ``urls.py`` file would contain something like::
 
     urlpatterns = [
-        url(r'^checkout/$', OrderWizard.as_view(FORMS, condition_dict={'cc': pay_by_credit_card})),
+        path('checkout/', OrderWizard.as_view(FORMS, condition_dict={'cc': pay_by_credit_card})),
     ]
 
 The ``condition_dict`` can be passed as attribute for the ``as_view()``
@@ -681,7 +681,7 @@ We define our wizard in a ``views.py``::
 
 We need to add the ``ContactWizard`` to our ``urls.py`` file::
 
-    from django.conf.urls import url
+    from django.urls import path
 
     from myapp.forms import ContactForm1, ContactForm2
     from myapp.views import ContactWizard, show_message_form_condition
@@ -689,7 +689,7 @@ We need to add the ``ContactWizard`` to our ``urls.py`` file::
     contact_forms = [ContactForm1, ContactForm2]
 
     urlpatterns = [
-        url(r'^contact/$', ContactWizard.as_view(contact_forms,
+        path('contact/', ContactWizard.as_view(contact_forms,
             condition_dict={'1': show_message_form_condition}
         )),
     ]
@@ -734,7 +734,7 @@ The :meth:`~WizardView.as_view` method takes two additional arguments:
 This is an example of a ``urls.py`` for a contact wizard with two steps, step 1 named
 ``contactdata`` and step 2 named ``leavemessage``::
 
-    from django.conf.urls import url
+    from django.urls import path, re_path
 
     from myapp.forms import ContactForm1, ContactForm2
     from myapp.views import ContactWizard
@@ -748,8 +748,8 @@ This is an example of a ``urls.py`` for a contact wizard with two steps, step 1 
         url_name='contact_step', done_step_name='finished')
 
     urlpatterns = [
-        url(r'^contact/(?P<step>.+)/$', contact_wizard, name='contact_step'),
-        url(r'^contact/$', contact_wizard, name='contact'),
+        re_path(r'^contact/(?P<step>.+)/$', contact_wizard, name='contact_step'),
+        path('contact/', contact_wizard, name='contact'),
     ]
 
 Advanced ``NamedUrlWizardView`` methods
